@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// TODO Problem 1 - Run test cases and record any defects the test code finds in the comment above the test method.
+// Problem 1 - Test results and defects are documented above each test method.
 // DO NOT MODIFY THE CODE IN THE TESTS in this file, just the comments above the tests. 
 // Fix the code being tested to match requirements and make all tests pass. 
 
@@ -11,7 +11,10 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3) and
     // run until the queue is empty
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: PersonQueue.Enqueue inserted at the front instead of the back,
+    // so the queue did not follow FIFO order.
+    // Actual Result (original): FAILED; the first person was Sue instead of Bob.
+    // Actual Result (after fixes): PASSED; all returned names matched the expected order.
     public void TestTakingTurnsQueue_FiniteRepetition()
     {
         var bob = new Person("Bob", 2);
@@ -43,7 +46,10 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3)
     // After running 5 times, add George with 3 turns.  Run until the queue is empty.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
-    // Defect(s) Found: 
+    // Defect(s) Found: Inserting people at the front of PersonQueue broke FIFO order,
+    // including the position of a person added during the rotation.
+    // Actual Result (original): FAILED; the first person was Sue instead of Bob.
+    // Actual Result (after fixes): PASSED; the complete sequence, including George, matched.
     public void TestTakingTurnsQueue_AddPlayerMidway()
     {
         var bob = new Person("Bob", 2);
@@ -85,7 +91,11 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: PersonQueue used the wrong insertion end. Once FIFO was fixed,
+    // GetNextPerson also removed Tim permanently because it did not re-enqueue zero turns.
+    // Actual Result (original): FAILED; the first person was Sue instead of Bob.
+    // Actual Result (FIFO fix only): FAILED; Sue was returned when Tim was expected.
+    // Actual Result (after fixes): PASSED; Tim stayed in rotation and his turns remained 0.
     public void TestTakingTurnsQueue_ForeverZero()
     {
         var timTurns = 0;
@@ -116,7 +126,11 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: PersonQueue used the wrong insertion end. Once FIFO was fixed,
+    // GetNextPerson also removed Tim permanently because it did not re-enqueue negative turns.
+    // Actual Result (original): FAILED; the first person was Sue instead of Tim.
+    // Actual Result (FIFO fix only): FAILED; Sue was returned when Tim was expected.
+    // Actual Result (after fixes): PASSED; Tim stayed in rotation and his turns remained -3.
     public void TestTakingTurnsQueue_ForeverNegative()
     {
         var timTurns = -3;
@@ -143,7 +157,9 @@ public class TakingTurnsQueueTests
     [TestMethod]
     // Scenario: Try to get the next person from an empty queue
     // Expected Result: Exception should be thrown with appropriate error message.
-    // Defect(s) Found: 
+    // Defect(s) Found: None; the empty-queue exception already met the requirement.
+    // Actual Result (original and after fixes): PASSED; InvalidOperationException was
+    // thrown with the message "No one in the queue."
     public void TestTakingTurnsQueue_Empty()
     {
         var players = new TakingTurnsQueue();
